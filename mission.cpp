@@ -100,13 +100,13 @@ void Mission::createAlgorithm()
             multiagentSearch = new ConflictBasedSearch<FocalSearch<>>(new FocalSearch<>(true, config.focalW));
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
             multiagentSearch = new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.focalW));
-        } else if (config.lowLevel == CN_SP_ST_FLPASTAR) {
+        }/* else if (config.lowLevel == CN_SP_ST_FLPASTAR) {
             multiagentSearch = new ConflictBasedSearch<FocalLPAStar<FLPANode>>(new FocalLPAStar<FLPANode>(config.focalW));
         } else if (config.lowLevel == CN_SP_ST_RASTAR) {
             multiagentSearch = new ConflictBasedSearch<ReplanningAStar<ReplanningAstarNode>>(new ReplanningAStar<ReplanningAstarNode>(true));
         } else if (config.lowLevel == CN_SP_ST_RFS) {
             multiagentSearch = new ConflictBasedSearch<ReplanningFocalSearch<ReplanningFSNode>>(new ReplanningFocalSearch<ReplanningFSNode>(true, config.focalW));
-        }
+        }*/
     } else if (config.searchType == CN_ST_PP) {
         if (config.lowLevel == CN_SP_ST_ASTAR) {
             multiagentSearch = new PrioritizedPlanning<Astar<>>(new Astar<>(true));
@@ -118,21 +118,21 @@ void Mission::createAlgorithm()
             multiagentSearch = new PrioritizedPlanning<ZeroSCIPP<>>(new ZeroSCIPP<>(config.focalW, config.genSuboptFromOpt));
         }
     } else if (config.searchType == CN_ST_ACBS) {
-        if (config.lowLevel == CN_SP_ST_ASTAR) {
+        /*if (config.lowLevel == CN_SP_ST_ASTAR) {
             multiagentSearch = new AnytimeCBS<Astar<>>(new ConflictBasedSearch<Astar<>>(new Astar<>(true)));
         } else if (config.lowLevel == CN_SP_ST_SIPP) {
             multiagentSearch = new AnytimeCBS<SIPP<>>(new ConflictBasedSearch<SIPP<>>(new SIPP<>()));
         } else if (config.lowLevel == CN_SP_ST_RASTAR) {
             multiagentSearch = new AnytimeCBS<ReplanningAStar<ReplanningAstarNode>>(new ConflictBasedSearch<ReplanningAStar<ReplanningAstarNode>>(new ReplanningAStar<ReplanningAstarNode>()));
-        }
+        }*/
     } else if (config.searchType == CN_ST_AECBS) {
-        if (config.lowLevel == CN_SP_ST_FS) {
+        /*if (config.lowLevel == CN_SP_ST_FS) {
             multiagentSearch = new AnytimeCBS<FocalSearch<>>(new ConflictBasedSearch<FocalSearch<>>(new FocalSearch<>(true, config.focalW)));
         } else if (config.lowLevel == CN_SP_ST_SCIPP) {
             multiagentSearch = new AnytimeCBS<SCIPP<>>(new ConflictBasedSearch<SCIPP<>>(new SCIPP<>(config.focalW)));
         } else if (config.lowLevel == CN_SP_ST_RFS) {
             multiagentSearch = new AnytimeCBS<ReplanningFocalSearch<>>(new ConflictBasedSearch<ReplanningFocalSearch<>>(new ReplanningFocalSearch<>(true, config.focalW)));
-        }
+        }*/
     }
 }
 

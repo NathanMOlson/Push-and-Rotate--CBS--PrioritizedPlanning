@@ -45,15 +45,15 @@ struct Node
 };
 
 struct NodeHash {
-    size_t operator()(const Node& node) const {
+    unsigned int operator()(const Node& node) const {
         return (node.i + node.j) * (node.i + node.j + 1) + node.j;
     }
 };
 
 struct NodePairHash {
-    size_t operator()(const std::pair<Node, Node>& pair) const {
+    unsigned int operator()(const std::pair<Node, Node>& pair) const {
         NodeHash nodeHash;
-        size_t hash1 = nodeHash(pair.first), hash2 = nodeHash(pair.second);
+        unsigned int hash1 = nodeHash(pair.first), hash2 = nodeHash(pair.second);
         return (hash1 + hash2) * (hash1 + hash2 + 1) + hash2;
     }
 };
