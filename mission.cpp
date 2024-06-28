@@ -248,9 +248,7 @@ void Mission::startSearch(const std::string &agentsFile)
 
         if (config.singleExecution) {
             saveAgentsPathsToLog(agentsFile, sr.time.back(), sr.makespan.back(), sr.flowtime.back(),
-                                 sr.HLExpansions.back(), sr.HLNodes.back(),
-                                 sr.HLExpansionsStart.back(), sr.HLNodesStart.back(),
-                                 sr.AvgLLExpansions.back(), sr.AvgLLNodes.back());
+                                 0, 0, 0, 0, 0.0, 0.0);
         }
         if (!checkCorrectness()) {
             std::cout << "Search returned incorrect results!" << std::endl;

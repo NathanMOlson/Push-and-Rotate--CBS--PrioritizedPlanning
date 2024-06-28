@@ -725,7 +725,7 @@ int PushAndRotate::getReachableNodesCount(const Map &map, AgentSet &agentSet, No
     Dijkstra<> dijkstraSearch;
     SearchResult searchResult = dijkstraSearch.startSearch(map, agentSet, start.i, start.j, 0, 0,
                                                            condition, true, false, 0, -1, -1, occupiedNodes);
-    while (searchResult.pathfound) {
+    while (searchResult.pathlength) {
         ++res;
         searchResult = dijkstraSearch.startSearch(map, agentSet, start.i, start.j, 0, 0,
                                                                condition, false, false, 0, -1, -1, occupiedNodes);
