@@ -316,7 +316,7 @@ bool Mission::checkCorrectness() {
         if (conflict.edgeConflict) {
             std::cout << "Incorrect result: two agents swap positions!" << std::endl;
         } else {
-            std::cout << "Incorrect result: two agents occupy the same node!" << std::endl;
+            std::cout << "Incorrect result: agents "<<conflict.id1<<" and " <<conflict.id2 <<" occupy the same node at time "<<conflict.time <<"!" << std::endl;
         }
         return false;
     }
