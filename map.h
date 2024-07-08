@@ -39,7 +39,7 @@ class Map
         bool CellIsOccupied (int i, int j, const std::unordered_set<Node, NodeHash> &occupiedNodes) const;
         bool CellOnGrid (int i, int j) const;
         bool CellIsObstacle(int i, int j) const;
-        std::unordered_set<Node, NodeHash> getNeighbors(int i, int j) const;
+        std::list<Node> getNeighbors(int i, int j) const;
         int  getValue(int i, int j) const;
         int getMapHeight() const;
         int getMapWidth() const;

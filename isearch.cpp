@@ -157,7 +157,7 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
                                         bool withCAT, const ConflictAvoidanceTable &CAT)
 {
     std::list<NodeType> successors;
-    std::unordered_set<Node, NodeHash> neighbors = map.getNeighbors(curNode.i,curNode.j);
+    std::list<Node> neighbors = map.getNeighbors(curNode.i,curNode.j);
     for (const auto& neighbor : neighbors)
     {
         int di = neighbor.i - curNode.i;

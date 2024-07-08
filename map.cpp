@@ -213,9 +213,9 @@ int Map::getCellDegree(int i, int j) const
     return getNeighbors(i, j).size() - 1;
 }
 
-std::unordered_set<Node, NodeHash> Map::getNeighbors(int i, int j) const
+std::list<Node> Map::getNeighbors(int i, int j) const
 {
-    std::unordered_set<Node, NodeHash> neighbors;
+    std::list<Node> neighbors;
     for (int di = -1; di <= 1; ++di)
     {
         for (int dj = -1; dj <= 1; ++dj)
@@ -226,7 +226,7 @@ std::unordered_set<Node, NodeHash> Map::getNeighbors(int i, int j) const
             }
             if (CellOnGrid(i + di, j + dj) && !CellIsObstacle(i + di, j + dj))
             {
-                neighbors.insert(Node(i + di, j + dj));
+                neighbors.push_back(Node(i + di, j + dj));
             }
         }
     }
