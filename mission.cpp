@@ -303,6 +303,12 @@ bool Mission::checkCorrectness() {
             if (i > 0 &&
                 abs(agentsPaths[j][i].i - agentsPaths[j][i - 1].i) +
                 abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) > 1) {
+                if (agentsPaths[j][i].i == agentsPaths[j][i - 1].i &&
+                    abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) == 2 &&
+                    map.CellIsWarp(agentsPaths[j][i].i, (agentsPaths[j][i].j + agentsPaths[j][i-1].j)/2))
+                {
+                    continue;
+                }
                 std::cout << "Incorrect result: consecutive nodes in agent path are not adjacent!" << std::endl;
                 return false;
             }

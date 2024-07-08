@@ -28,6 +28,7 @@ class Map
         int     emptyCellCount;
         double  cellSize;
         int**   Grid;
+        bool**  Barriers;
 
     public:
         Map();

@@ -128,6 +128,12 @@ bool Map::getMap(const char *FileName)
             Grid = new int *[height];
             for (int i = 0; i < height; ++i)
                 Grid[i] = new int[width];
+            Barriers = new bool *[height];
+            for (int i = 0; i < height; ++i)
+            {
+                Barriers[i] = new bool[width - 1];
+                memset(Barriers[i], 0, width - 1);
+            }
 
             element = mapnode->FirstChildElement();
             while (grid_i < height)
@@ -184,6 +190,61 @@ bool Map::getMap(const char *FileName)
         return false;
     }
 
+    rowiter = 0;
+    int barriers_i = 0, barriers_j = 0;
+    for (mapnode = map->FirstChildElement(); mapnode; mapnode = mapnode->NextSiblingElement())
+    {
+        element = mapnode->ToElement();
+        value = mapnode->Value();
+        std::transform(value.begin(), value.end(), value.begin(), ::tolower);
+
+        if (value == CNS_TAG_BARRIERS)
+        {
+            element = mapnode->FirstChildElement();
+            while (barriers_i < height)
+            {
+                if (!element)
+                {
+                    std::cout << "Error! Not enough '" << CNS_TAG_ROW << "' tags inside '" << CNS_TAG_BARRIERS << "' tag."
+                              << std::endl;
+                    std::cout << "Number of '" << CNS_TAG_ROW
+                              << "' tags should be equal (or greater) than the value of '" << CNS_TAG_HEIGHT
+                              << "' tag which is " << height << std::endl;
+                    return false;
+                }
+                std::string str = element->GetText();
+                std::vector<std::string> elems;
+                std::stringstream ss(str);
+                std::string item;
+                while (std::getline(ss, item, ' '))
+                    elems.push_back(item);
+                rowiter = barriers_j = 0;
+                int val;
+                if (elems.size() > 0)
+                    for (barriers_j = 0; barriers_j < width - 1; ++barriers_j)
+                    {
+                        if (barriers_j == elems.size())
+                            break;
+                        stream.str("");
+                        stream.clear();
+                        stream << elems[barriers_j];
+                        stream >> val;
+                        Barriers[barriers_i][barriers_j] = val;
+                    }
+
+                if (barriers_j != width - 1)
+                {
+                    std::cout << "Invalid value on " << CNS_TAG_BARRIERS << " in the " << barriers_i + 1 << " " << CNS_TAG_ROW
+                              << std::endl;
+                    return false;
+                }
+                ++barriers_i;
+
+                element = element->NextSiblingElement();
+            }
+        }
+    }
+
     return true;
 }
 
@@ -220,7 +281,11 @@ double Map::getCellSize() const
 
 int Map::getCellDegree(int i, int j) const
 {
-    return getNeighbors(i, j).size() - 1;
+    if (CellIsFree(i, j))
+    {
+        return getNeighbors(i, j).size() - 1;
+    }
+    return getNeighbors(i, j).size();
 }
 
 std::list<Node> Map::getNeighbors(int i, int j) const
@@ -236,13 +301,21 @@ std::list<Node> Map::getNeighbors(int i, int j) const
             }
             if (CellOnGrid(i + di, j + dj))
             {
+                if (dj == 1 && Barriers[i][j])
+                {
+                    continue;
+                }
+                if (dj == -1 && Barriers[i][j - 1])
+                {
+                    continue;
+                }
                 if (CellIsFree(i + di, j + dj))
                 {
                     neighbors.push_back(Node(i + di, j + dj));
                 }
-                if (CellIsWarp(i + di, j + dj))
+                if (CellIsWarp(i + di, j + dj) && CellIsFree(i + 2 * di, j + dj))
                 {
-                    neighbors.push_back(Node(i + 2*di, j + dj));
+                    neighbors.push_back(Node(i + 2 * di, j + dj));
                 }
             }
         }
