@@ -30,7 +30,12 @@ bool Map::CellIsTraversable(int i, int j, const std::unordered_set<Node, NodeHas
 
 bool Map::CellIsObstacle(int i, int j) const
 {
-    return (Grid[i][j] != CN_GC_NOOBS);
+    return (Grid[i][j] == CN_GC_OBS);
+}
+
+bool Map::CellIsFree(int i, int j) const
+{
+    return (Grid[i][j] == CN_GC_FREE);
 }
 
 bool Map::CellOnGrid(int i, int j) const
@@ -149,7 +154,7 @@ bool Map::getMap(const char *FileName)
                         stream << elems[grid_j];
                         stream >> val;
                         Grid[grid_i][grid_j] = val;
-                        if (val == CN_GC_NOOBS)
+                        if (val == CN_GC_FREE)
                         {
                             ++emptyCellCount;
                         }

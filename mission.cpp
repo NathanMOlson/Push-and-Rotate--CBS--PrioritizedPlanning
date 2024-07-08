@@ -146,7 +146,7 @@ bool Mission::checkAgentsCorrectness(const std::string &agentsFile) {
         Agent agent = agentSet.getAgent(i);
         Node start = agent.getStartPosition(), goal = agent.getGoalPosition();
         if (!map.CellOnGrid(start.i, start.j) || !map.CellOnGrid(goal.i, goal.j) ||
-            map.CellIsObstacle(start.i, start.j) || map.CellIsObstacle(goal.i, goal.j)) {
+            !map.CellIsFree(start.i, start.j) || !map.CellIsFree(goal.i, goal.j)) {
             std::cout << "Warning: start or goal position of agent " << agent.getId() << " in " << agentsFile <<
                          " agents file is incorrect. This file will be ignored" << std::endl;
             return false;
@@ -296,7 +296,7 @@ bool Mission::checkCorrectness() {
             if (i >= agentsPaths[j].size()) {
                 continue;
             }
-            if (map.CellIsObstacle(agentsPaths[j][i].i, agentsPaths[j][i].j)) {
+            if (!map.CellIsFree(agentsPaths[j][i].i, agentsPaths[j][i].j)) {
                 std::cout << "Incorrect result: agent path goes through obstacle!" << std::endl;
                 return false;
             }

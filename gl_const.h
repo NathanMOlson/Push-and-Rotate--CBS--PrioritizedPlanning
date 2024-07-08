@@ -212,8 +212,9 @@
 
 
 //Grid Cell
-    #define CN_GC_NOOBS 0
-    #define CN_GC_OBS   1
+    #define CN_GC_FREE 0
+    #define CN_GC_OBS  1
+    #define CN_GC_WARP 2
 
 //Other
     #define CNS_OTHER_PATHSELECTION     "*"
