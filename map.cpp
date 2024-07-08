@@ -210,19 +210,25 @@ double Map::getCellSize() const
 
 int Map::getCellDegree(int i, int j) const
 {
-    int degree = 0;
+    return getNeighbors(i, j).size() - 1;
+}
+
+std::unordered_set<Node, NodeHash> Map::getNeighbors(int i, int j) const
+{
+    std::unordered_set<Node, NodeHash> neighbors;
     for (int di = -1; di <= 1; ++di)
     {
         for (int dj = -1; dj <= 1; ++dj)
         {
-            if ((di == 0) ^ (dj == 0))
+            if (di != 0 && dj != 0)
             {
-                if (CellOnGrid(i + di, j + dj) && !CellIsObstacle(i + di, j + dj))
-                {
-                    ++degree;
-                }
+                continue;
+            }
+            if (CellOnGrid(i + di, j + dj) && !CellIsObstacle(i + di, j + dj))
+            {
+                neighbors.insert(Node(i + di, j + dj));
             }
         }
     }
-    return degree;
+    return neighbors;
 }

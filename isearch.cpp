@@ -157,10 +157,13 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
                                         bool withCAT, const ConflictAvoidanceTable &CAT)
 {
     std::list<NodeType> successors;
-    for (int di = -1; di <= 1; ++di) {
-        for (int dj = -1; dj <= 1; ++dj) {
-            int newi = curNode.i + di, newj = curNode.j + dj;
-            if ((di == 0 || dj == 0) && (canStay() || di != 0 || dj != 0) && map.CellOnGrid(newi, newj) &&
+    std::unordered_set<Node, NodeHash> neighbors = map.getNeighbors(curNode.i,curNode.j);
+    for (const auto& neighbor : neighbors)
+    {
+        int di = neighbor.i - curNode.i;
+        int dj = neighbor.j - curNode.j;
+        int newi = neighbor.i, newj = neighbor.j;
+            if ((canStay() || di != 0 || dj != 0) && map.CellOnGrid(newi, newj) &&
                     map.CellIsTraversable(newi, newj, occupiedNodes)) {
                 int newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
                 NodeType neigh(newi, newj, nullptr, curNode.g + 1, newh);
@@ -168,7 +171,6 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
                 createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
                                          neigh.i == goal_i && neigh.j == goal_j);
             }
-        }
     }
     return successors;
 }
