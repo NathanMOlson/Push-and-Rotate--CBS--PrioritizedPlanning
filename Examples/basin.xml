@@ -1,0 +1,34 @@
+<?xml version="1.0" ?>
+<root>
+    <map>
+        <grid width="64" height="3">
+            <row>0 0 0 0 1 0 0 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+            <row>0 0 0 0 1 1 1 1 0 1 1 1 1 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+            <row>0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0</row>
+        </grid>
+    </map>
+    <algorithm>
+        <planner>push_and_rotate</planner>
+        <low_level>astar</low_level>
+        <with_cat>true</with_cat>
+        <with_perfect_h>false</with_perfect_h>
+        <with_card_conf>true</with_card_conf>
+        <with_bypassing>true</with_bypassing>
+        <with_matching_h>true</with_matching_h>
+        <with_disjoint_splitting>true</with_disjoint_splitting>
+        <gen_subopt_from_opt>false</gen_subopt_from_opt>
+        <focal_w>1.5</focal_w>
+        <pp_order>2</pp_order>
+        <parallelize_paths_1>true</parallelize_paths_1>
+        <parallelize_paths_2>false</parallelize_paths_2>
+    </algorithm>
+    <options>
+        <agents_file>bunched</agents_file>
+        <tasks_count>1</tasks_count>
+        <agents_range min="1" max="14"/>
+        <maxtime>2000</maxtime>
+        <single_execution>true</single_execution>
+        <aggregated_results>false</aggregated_results>
+    <logfilename />
+  </options>
+</root>
