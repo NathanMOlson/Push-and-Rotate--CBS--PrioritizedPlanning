@@ -472,7 +472,7 @@ bool PushAndRotate::solve(const Map &map, const Config &config, AgentSet &agentS
     bool isPolygon = true;
     for (int i = 0; i < map.getMapHeight(); ++i) {
         for (int j = 0; j < map.getMapWidth(); ++j) {
-            if (!map.CellIsObstacle(i, j) && map.getCellDegree(i, j) != 2) {
+            if (map.CellIsFree(i, j) && map.getCellDegree(i, j) != 2) {
                 isPolygon = false;
                 break;
             }
@@ -615,7 +615,7 @@ void PushAndRotate::getSubgraphs(const Map &map, AgentSet &agentSet) {
     int connectedComponentNum = 0;
     for (int i = 0; i < map.getMapHeight(); ++i) {
         for (int j = 0; j < map.getMapWidth(); ++j) {
-            if (!map.CellIsObstacle(i, j)) {
+            if (map.CellIsFree(i, j)) {
                 Node curNode = Node(i, j);
                 if (close.find(curNode) == close.end()) {
                     int oldSize = close.size();
@@ -673,7 +673,7 @@ void PushAndRotate::getSubgraphs(const Map &map, AgentSet &agentSet) {
 
     for (int i = 0; i < map.getMapHeight(); ++i) {
         for (int j = 0; j < map.getMapWidth(); ++j) {
-            if (!map.CellIsObstacle(i, j) && map.getCellDegree(i, j) >= 3 && agentSet.getSubgraphs(i, j).empty()) {
+            if (map.CellIsFree(i, j) && map.getCellDegree(i, j) >= 3 && agentSet.getSubgraphs(i, j).empty()) {
                 agentSet.setNodeSubgraph(i, j, components.size());
                 components.push_back({Node(i, j)});
                 joinNodes.insert(Node(i, j));
@@ -747,7 +747,7 @@ void PushAndRotate::assignToSubgraphs(const Map &map, AgentSet &agentSet) {
     int m = map.getEmptyCellCount() - agentSet.getAgentCount();
     for (int i = 0; i < map.getMapHeight(); ++i) {
         for (int j = 0; j < map.getMapWidth(); ++j) {
-            if (map.CellIsObstacle(i, j)) {
+            if (!map.CellIsFree(i, j)) {
                 continue;
             }
             Node pos(i, j);
@@ -808,7 +808,7 @@ void PushAndRotate::getPriorities(const Map &map, AgentSet &agentSet) {
     };
     for (int i = 0; i < map.getMapHeight(); ++i) {
         for (int j = 0; j < map.getMapWidth(); ++j) {
-            if (map.CellIsObstacle(i, j)) {
+            if (!map.CellIsFree(i, j)) {
                 continue;
             }
 

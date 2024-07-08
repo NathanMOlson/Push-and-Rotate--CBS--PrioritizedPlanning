@@ -25,7 +25,7 @@ bool Map::CellIsOccupied(int i, int j, const std::unordered_set<Node, NodeHash> 
 
 bool Map::CellIsTraversable(int i, int j, const std::unordered_set<Node, NodeHash> &occupiedNodes) const
 {
-    return !CellIsObstacle(i, j) && !CellIsOccupied(i, j, occupiedNodes);
+    return CellIsFree(i, j) && !CellIsOccupied(i, j, occupiedNodes);
 }
 
 bool Map::CellIsObstacle(int i, int j) const
