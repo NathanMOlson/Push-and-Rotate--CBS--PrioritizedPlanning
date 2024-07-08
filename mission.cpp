@@ -303,9 +303,9 @@ bool Mission::checkCorrectness() {
             if (i > 0 &&
                 abs(agentsPaths[j][i].i - agentsPaths[j][i - 1].i) +
                 abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) > 1) {
-                if (agentsPaths[j][i].i == agentsPaths[j][i - 1].i &&
-                    abs(agentsPaths[j][i].j - agentsPaths[j][i - 1].j) == 2 &&
-                    map.CellIsWarp(agentsPaths[j][i].i, (agentsPaths[j][i].j + agentsPaths[j][i-1].j)/2))
+                if (agentsPaths[j][i].j == agentsPaths[j][i - 1].j &&
+                    abs(agentsPaths[j][i].i - agentsPaths[j][i - 1].i) == 2 &&
+                    map.CellIsWarp((agentsPaths[j][i].i + agentsPaths[j][i-1].i)/2, agentsPaths[j][i].j))
                 {
                     continue;
                 }
