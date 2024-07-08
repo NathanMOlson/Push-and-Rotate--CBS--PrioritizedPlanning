@@ -40,6 +40,7 @@ class Map
         bool CellOnGrid (int i, int j) const;
         bool CellIsObstacle(int i, int j) const;
         bool CellIsFree(int i, int j) const;
+        bool CellIsWarp(int i, int j) const;
         std::list<Node> getNeighbors(int i, int j) const;
         int  getValue(int i, int j) const;
         int getMapHeight() const;

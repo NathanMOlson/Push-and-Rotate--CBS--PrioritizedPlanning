@@ -38,6 +38,11 @@ bool Map::CellIsFree(int i, int j) const
     return (Grid[i][j] == CN_GC_FREE);
 }
 
+bool Map::CellIsWarp(int i, int j) const
+{
+    return (Grid[i][j] == CN_GC_WARP);
+}
+
 bool Map::CellOnGrid(int i, int j) const
 {
     return (i < height && i >= 0 && j < width && j >= 0);
@@ -229,9 +234,16 @@ std::list<Node> Map::getNeighbors(int i, int j) const
             {
                 continue;
             }
-            if (CellOnGrid(i + di, j + dj) && !CellIsObstacle(i + di, j + dj))
+            if (CellOnGrid(i + di, j + dj))
             {
-                neighbors.push_back(Node(i + di, j + dj));
+                if (CellIsFree(i + di, j + dj))
+                {
+                    neighbors.push_back(Node(i + di, j + dj));
+                }
+                if (CellIsWarp(i + di, j + dj))
+                {
+                    neighbors.push_back(Node(i + 2*di, j + dj));
+                }
             }
         }
     }
