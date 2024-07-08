@@ -36,6 +36,7 @@ class Map
 
         bool getMap(const char *FileName);
         bool CellIsTraversable (int i, int j, const std::unordered_set<Node, NodeHash> &occupiedNodes) const;
+        bool CellIsOccupied (int i, int j, const std::unordered_set<Node, NodeHash> &occupiedNodes) const;
         bool CellOnGrid (int i, int j) const;
         bool CellIsObstacle(int i, int j) const;
         int  getValue(int i, int j) const;
