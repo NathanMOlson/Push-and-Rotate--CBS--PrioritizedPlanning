@@ -163,8 +163,7 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
         int di = neighbor.i - curNode.i;
         int dj = neighbor.j - curNode.j;
         int newi = neighbor.i, newj = neighbor.j;
-            if ((canStay() || di != 0 || dj != 0) && map.CellOnGrid(newi, newj) &&
-                    map.CellIsTraversable(newi, newj, occupiedNodes)) {
+            if ((canStay() || di != 0 || dj != 0) && map.CellIsTraversable(newi, newj, occupiedNodes)) {
                 int newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
                 NodeType neigh(newi, newj, nullptr, curNode.g + 1, newh);
                 neigh.conflictsCount = CAT.getAgentsCount(neigh, curNode);
