@@ -278,14 +278,15 @@ bool Mission::checkCorrectness() {
         solutionSize = std::max(solutionSize, agentsPaths[j].size());
     }
     std::vector<std::vector<Node>::iterator> starts, ends;
+    bool failed = false;
     for (int j = 0; j < agentCount; ++j) {
         if (agentsPaths[j][0] != agentSet.getAgent(j).getStartPosition()) {
-            std::cout << "Incorrect result: agent path starts in wrong position!" << std::endl;
-            return false;
+            std::cout << "Incorrect result: agent "<<j<<" starts at ("<<agentsPaths[j][0].i <<", "<< agentsPaths[j][0].j<<"), should start at ("<<agentSet.getAgent(j).getStartPosition().i<<", "<<agentSet.getAgent(j).getStartPosition().j<<")!" << std::endl;
+            failed = true;
         }
         if (agentsPaths[j].back() != agentSet.getAgent(j).getGoalPosition()) {
-            std::cout << "Incorrect result: agent path ends in wrong position!" << std::endl;
-            return false;
+            std::cout << "Incorrect result: agent "<<j<<" ends at ("<<agentsPaths[j].back().i <<", "<< agentsPaths[j].back().j<<"), should end at ("<<agentSet.getAgent(j).getGoalPosition().i<<", "<<agentSet.getAgent(j).getGoalPosition().j<<")!" << std::endl;
+            failed = true;
         }
         starts.push_back(agentsPaths[j].begin());
         ends.push_back(agentsPaths[j].end());
@@ -295,6 +296,10 @@ bool Mission::checkCorrectness() {
         for (int j = 0; j < agentCount; ++j) {
             if (i >= agentsPaths[j].size()) {
                 continue;
+            }
+            if (!map.CellOnGrid(agentsPaths[j][i].i, agentsPaths[j][i].j)) {
+                std::cout << "Incorrect result: agent "<<j<<" path goes off grid at ("<<agentsPaths[j][i].i<<", "<<agentsPaths[j][i].j<<")!" << std::endl;
+                return false;
             }
             if (!map.CellIsFree(agentsPaths[j][i].i, agentsPaths[j][i].j)) {
                 std::cout << "Incorrect result: agent path goes through obstacle!" << std::endl;
@@ -309,10 +314,14 @@ bool Mission::checkCorrectness() {
                 {
                     continue;
                 }
-                std::cout << "Incorrect result: consecutive nodes in agent path are not adjacent!" << std::endl;
-                return false;
+                std::cout << "Incorrect result: consecutive nodes in agent path are not adjacent! Agent "<<j<< " jumps from ("<<agentsPaths[j][i - 1].i<<", "<<agentsPaths[j][i - 1].j<<") to ("<<agentsPaths[j][i].i<<", "<<agentsPaths[j][i].j<<")" << std::endl;
+                failed == true;
             }
         }
+    }
+    if (failed)
+    {
+        return false;
     }
     ConflictSet conflictSet = ConflictBasedSearch<>::findConflict<std::vector<Node>::iterator>(starts, ends);
     if (!conflictSet.empty()) {
