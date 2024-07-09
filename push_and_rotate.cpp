@@ -203,34 +203,62 @@ void PushAndRotate::reverse(int begSize, int endSize,
     }
 }
 
+struct SearchResult2
+{
+        float pathlength; //if path not found, then pathlength=0
+        Node lastNode;
+};
+
+bool sort_by_length(const SearchResult2& a, const SearchResult2& b)
+{
+    return a.pathlength < b.pathlength;
+}
+
 bool PushAndRotate::swap(const Map &map, AgentSet &agentSet, Node& first, Node& second) {
     int firstAgentId = agentSet.getAgentId(first.i, first.j);
     int secondAgentId = agentSet.getAgentId(second.i, second.j);
 
-    auto isGoal = [](const Node &start, const Node &cur, const Map &map, const AgentSet &agentSet) {
-        return map.getCellDegree(cur.i, cur.j) >= 3;
-    };
-
+    std::vector<SearchResult2> search_results;
     Dijkstra<> dijkstraSearch;
-    SearchResult searchResult = dijkstraSearch.startSearch(map, agentSet, first.i, first.j, 0, 0, isGoal);
-    while (searchResult.pathfound) {
-        int begSize = agentsMoves.size();
-        AgentSet newAgentSet = agentSet;
+    for (int i = 0; i < map.getMapHeight(); i++)
+    {
+        for (int j = 0; j < map.getMapWidth(); j++)
+        {
+            if(map.CellIsFree(i,j) && map.getCellDegree(i,j) >= 3)
+            {
+                SearchResult searchResult = dijkstraSearch.startSearch(map, agentSet, first.i, first.j, i, j);
+                if(searchResult.pathfound)
+                {
+                    search_results.push_back(SearchResult2{searchResult.pathlength, Node(searchResult.lastNode.i, searchResult.lastNode.j)});
+                }
+            }
+        }
+    }
+    std::sort(search_results.begin(), search_results.end(), sort_by_length);
+
+    std::vector<AgentMove> agents_moves = agentsMoves;
+    AgentSet agent_set = agentSet;
+    int begSize = agentsMoves.size();
+
+    for (const auto& searchResult2 : search_results) {
+        SearchResult searchResult = dijkstraSearch.startSearch(map, agentSet, first.i, first.j, searchResult2.lastNode.i, searchResult2.lastNode.j);
+        agentSet = agent_set;
+        agentsMoves = agents_moves;
         auto path = *searchResult.lppath;
         Node exchangeNode = path.back();
-        if (multipush(map, newAgentSet, first, second, exchangeNode, path)) {
-            int exchangeAgentId = newAgentSet.getAgentId(exchangeNode.i, exchangeNode.j);
+        //std::cout<<"multipushing@"<<searchResult.lastNode.i<<", "<<searchResult.lastNode.j<<std::endl;
+        if (multipush(map, agentSet, first, second, exchangeNode, path)) {
+            int exchangeAgentId = agentSet.getAgentId(exchangeNode.i, exchangeNode.j);
             int neighAgentId = (exchangeAgentId == firstAgentId) ? secondAgentId : firstAgentId;
-            Node neigh = newAgentSet.getAgent(neighAgentId).getCurPosition();
-            if (clear(map, newAgentSet, exchangeNode, neigh)) {
-                agentSet = newAgentSet;
+            Node neigh = agentSet.getAgent(neighAgentId).getCurPosition();
+            if (clear(map, agentSet, exchangeNode, neigh)) {
+                agentSet = agentSet;
                 int endSize = agentsMoves.size();
                 exchange(map, agentSet, exchangeNode, neigh);
                 reverse(begSize, endSize, firstAgentId, secondAgentId, agentSet);
                 return true;
             }
         }
-        searchResult = dijkstraSearch.startSearch(map, agentSet, first.i, first.j, 0, 0, isGoal, false);
     }
     return false;
 }

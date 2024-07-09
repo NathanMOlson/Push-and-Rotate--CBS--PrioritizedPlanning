@@ -285,7 +285,7 @@ int Map::getCellDegree(int i, int j) const
     {
         return getNeighbors(i, j).size() - 1;
     }
-    return getNeighbors(i, j).size();
+    return 0;
 }
 
 std::list<Node> Map::getNeighbors(int i, int j) const
