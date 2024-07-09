@@ -474,7 +474,7 @@ void PushAndRotate::getParallelPaths(AgentSet &agentSet, const Config &config) {
 }
 
 bool PushAndRotate::solve(const Map &map, const Config &config, AgentSet &agentSet, std::chrono::steady_clock::time_point begin) {
-    auto comparator = [&agentSet](int id1, int id2) {
+    auto comparator = [&agentSet, &config](int id1, int id2) {
         int subgraph1 = agentSet.getAgent(id1).getSubgraph();
         int subgraph2 = agentSet.getAgent(id2).getSubgraph();
 
@@ -484,6 +484,18 @@ bool PushAndRotate::solve(const Map &map, const Config &config, AgentSet &agentS
             } else if (subgraph2 == -1 || agentSet.hasPriority(subgraph1, subgraph2)) {
                 return true;
             }
+        }
+
+        int dist1=abs(agentSet.getAgent(id1).getStart_i()-agentSet.getAgent(id1).getGoal_i()) + abs(agentSet.getAgent(id1).getStart_j()-agentSet.getAgent(id1).getGoal_j());
+        int dist2=abs(agentSet.getAgent(id2).getStart_i()-agentSet.getAgent(id2).getGoal_i()) + abs(agentSet.getAgent(id2).getStart_j()-agentSet.getAgent(id2).getGoal_j());
+
+        if (config.ppOrder == 1 && dist1 != dist2)
+        {
+        return dist1 < dist2;
+        }
+        if (config.ppOrder == 2 && dist1 != dist2)
+        {
+        return dist1 > dist2;
         }
         return id1 < id2;
     };
