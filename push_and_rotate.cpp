@@ -522,20 +522,21 @@ bool PushAndRotate::solve(const Map &map, const Config &config, AgentSet &agentS
         }
     }
 
-    int curAgentId = -1;
+    int curAgentIndex = -1;
     Agent curAgent;
+    std::vector<int>agent_list;
+    for(const auto& agent : notFinished)
+    {
+        agent_list.push_back(agent);
+    }
     while (!notFinished.empty()) {
-        std::chrono::steady_clock::time_point now = std::chrono::steady_clock::now();
-        if (std::chrono::duration_cast<std::chrono::milliseconds>(now - begin).count() > config.maxTime) {
-            return false;
+        curAgentIndex = (curAgentIndex + 1) % agent_list.size();
+        if (finished.count(agent_list[curAgentIndex]))
+        {
+            continue;
         }
-
-        if (curAgentId == -1) {
-            curAgent = agentSet.getAgent(*notFinished.begin());
-        } else {
-            curAgent = agentSet.getAgent(curAgentId);
-        }
-        notFinished.erase(curAgent.getId());
+        curAgent = agentSet.getAgent(agent_list[curAgentIndex]);
+        std::cout<<"current agent is " <<curAgent.getId()<<std::endl;
 
         SearchResult searchResult = search->startSearch(map, agentSet,
                                                         curAgent.getCur_i(), curAgent.getCur_j(),
@@ -543,65 +544,59 @@ bool PushAndRotate::solve(const Map &map, const Config &config, AgentSet &agentS
                                                         nullptr, true, true, 0, -1, -1,
                                                         isPolygon ? finishedPositions : std::unordered_set<Node, NodeHash>());
 
-        if (!searchResult.pathfound) {
-            return false;
-        }
-
         auto path = *searchResult.lppath;
+        std::cout<<curAgent.getId()<<" path is "<<path.size()<<std::endl;
+        if(path.size() == 2)
+        {
+            std::cout<<curAgent.getId()<<" is finished"<<std::endl;
+            notFinished.erase(curAgent.getId());
+        }
+        path.resize(2);
         qPath.push_back(*path.begin());
         qPathNodes.insert(*path.begin());
         for (auto it = path.begin(); it != std::prev(path.end()); ++it) {
-            if (qPathNodes.find(*std::next(it)) != qPathNodes.end()) {
-                int cycleBeg;
-                for (cycleBeg = qPath.size() - 1; cycleBeg >= 0 && qPath[cycleBeg] != *std::next(it); --cycleBeg);
-                rotate(map, agentSet, qPath, cycleBeg);
-
-                bool toErase = false;
-                while(qPath.size() != cycleBeg) {
-                    Node lastNode = qPath.back();
-                    if (agentSet.isOccupied(lastNode.i, lastNode.j) &&
-                            finished.find(agentSet.getAgentId(lastNode.i, lastNode.j)) != finished.end()) {
-                        if (!toErase) {
-                            finishedPositions.insert(lastNode);
-                            toErase = true;
-                        }
-                    } else {
-                        if (toErase) {
-                            finishedPositions.erase(lastNode);
-                            toErase = false;
-                        }
-                    }
-                    qPathNodes.erase(lastNode);
-                    qPath.pop_back();
-                }
-            } else if (!push(map, agentSet, *it, *std::next(it), finishedPositions)) {
+            if (!push(map, agentSet, *it, *std::next(it), finishedPositions)) {
+                std::cout<<"Failed to push "<<curAgent.getId()<<" to ("<<std::next(it)->i<<", "<<std::next(it)->j<<")"<<std::endl;
                 if (!swap(map, agentSet, *it, *std::next(it))) {
+                    std::cout<<curAgent.getId()<<" swap failed"<<std::endl;
                     return false;
                 }
+                std::cout<<curAgent.getId()<<" post swap"<<std::endl;
                 if (finished.find(agentSet.getAgentId(it->i, it->j)) != finished.end()) {
                     finishedPositions.erase(*std::next(it));
                     finishedPositions.insert(*it);
                 }
+                std::cout<<curAgent.getId()<<" post erase/insert"<<std::endl;
             }
             qPath.push_back(*std::next(it));
             qPathNodes.insert(*std::next(it));
         }
-        finished.insert(curAgent.getId());
-        finishedPositions.insert(curAgent.getGoalPosition());
 
-        curAgentId = -1;
+        if (notFinished.count(curAgent.getId()) == 0)
+        {
+            std::cout<<curAgent.getId()<<" marked finished at ("<<curAgent.getCur_i()<<", "<<curAgent.getCur_j()<<")"<<std::endl;
+            finished.insert(curAgent.getId());
+            finishedPositions.insert(curAgent.getGoalPosition());
+        }
+        else
+        {
+            std::cout<<curAgent.getId()<<" not finished"<<std::endl;
+        }
+
+        //curAgentId = -1;
         while (!qPath.empty()) {
             Node lastNode = qPath.back();
             if (agentSet.isOccupied(lastNode.i, lastNode.j)) {
                 Agent curAgent = agentSet.getAgent(agentSet.getAgentId(lastNode.i, lastNode.j));
-                Node goal = Node(curAgent.getGoal_i(), curAgent.getGoal_j());
+                //Node goal = Node(curAgent.getGoal_i(), curAgent.getGoal_j());
+                Node goal = Node(path.back().i, path.back().j);
                 if (notFinished.find(curAgent.getId()) == notFinished.end() && lastNode != goal) {
                     if (!agentSet.isOccupied(goal.i, goal.j)) {
                         agentSet.moveAgent(lastNode, goal, agentsMoves);
                         finishedPositions.erase(lastNode);
                         finishedPositions.insert(goal);
                     } else {
-                        curAgentId = agentSet.getAgentId(goal.i, goal.j);
+                        //curAgentId = agentSet.getAgentId(goal.i, goal.j);
                         break;
                     }
                 }
