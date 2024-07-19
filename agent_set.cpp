@@ -46,7 +46,10 @@ void AgentSet::moveAgent(Node &from, Node &to, std::vector<AgentMove>& result) {
     int id = occupiedNodes.at(std::make_pair(from.i, from.j));
     occupiedNodes[std::make_pair(to.i, to.j)] = id;
     occupiedNodes.erase(std::make_pair(from.i, from.j));
+        // std::cout<<"Agent 7f is at " <<getAgent(7).getCur_i()<<", "<<getAgent(7).getCur_j()<<std::endl;
+        std::cout<<"moving " <<id<<" to "<<to.i<<", "<<to.j<<std::endl;
     agents[id].setCurPosition(to.i, to.j);
+        // std::cout<<"Agent 7g is at " <<getAgent(7).getCur_i()<<", "<<getAgent(7).getCur_j()<<std::endl;
     result.push_back(AgentMove(to.i - from.i, to.j - from.j, id));
 }
 
