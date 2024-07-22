@@ -473,6 +473,224 @@ void PushAndRotate::getParallelPaths(AgentSet &agentSet, const Config &config) {
     }
 }
 
+
+bool PushAndRotate::solve_wrapper(const Map &map, const Config &config, AgentSet &agentSet, std::chrono::steady_clock::time_point begin) {
+
+    std::vector<Node> starting_nodes;
+    std::vector<Node> goal_nodes;
+    std::vector<Node> current_nodes;
+    std::vector<Node> shortterm_goal_nodes;
+    std::vector<std::vector<Node>> paths;
+    std::vector<int> current_path_index;
+    for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+        Agent curAgent = agentSet.getAgent(i);
+        starting_nodes.push_back(curAgent.getStartPosition());
+        goal_nodes.push_back(curAgent.getGoalPosition());
+                    // std::cout<<i<<" cur: "<<curAgent.getCur_i()<<","<<curAgent.getCur_j()<<std::endl;
+                    // std::cout<<i<<" goal: "<<curAgent.getGoal_i()<<","<<curAgent.getGoal_j()<<std::endl;
+        SearchResult result = search->startSearch(map, agentSet,
+                                                     curAgent.getCur_i(), curAgent.getCur_j(),
+                                                     curAgent.getGoal_i(), curAgent.getGoal_j(),
+                                                     nullptr, true, true, 0, -1, -1,
+                                                     std::unordered_set<Node, NodeHash>());
+        paths.push_back(std::vector<Node>());
+        for (Node node : *result.lppath)
+        {
+            paths[i].push_back(node);
+        }
+        current_path_index.push_back(0);
+    }
+    current_nodes = starting_nodes;
+    shortterm_goal_nodes = starting_nodes;
+    while(goal_nodes != current_nodes)
+    {
+        std::vector<bool> has_goal(agentSet.getAgentCount(), false);
+        std::vector<Node> candidate_nodes(agentSet.getAgentCount());
+        for (int i = 0; i < agentSet.getAgentCount(); ++i)
+        {
+            if(current_path_index[i] < paths[i].size() - 1)
+            {
+                candidate_nodes[i] = paths[i][current_path_index[i]+1];
+            }
+            else
+            {
+                candidate_nodes[i] = paths[i].back();
+            }
+        }
+
+        // if an agent is at its goal, and an agent wants to pass through, swap with it.
+        for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+            if(candidate_nodes[i] == current_nodes[i])
+            {
+                for(int j = 0; j < agentSet.getAgentCount(); ++j) {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+                    if(candidate_nodes[i] == candidate_nodes[j])
+                    {
+                        shortterm_goal_nodes[i] = current_nodes[j];
+                        shortterm_goal_nodes[j] = candidate_nodes[j];
+                        has_goal[i] = true;
+                        has_goal[j] = true;
+                        break;
+                    }
+                }
+            }
+        }
+        for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+            if(has_goal[i])
+            {
+                continue;
+            }
+            bool found_conflict = false;
+            for(int j = 0; j < agentSet.getAgentCount(); ++j) {
+                if (i == j)
+                {
+                    continue;
+                }
+                if(!has_goal[j])
+                {
+                    continue;
+                }
+                if(candidate_nodes[i] == shortterm_goal_nodes[j])
+                {
+                    // std::cout<<"conflict: "<<i<< " and "<<j<<std::endl;
+                    found_conflict = true;
+                    break;
+                }
+            }
+
+            if (found_conflict)
+            {
+                shortterm_goal_nodes[i] = current_nodes[i];
+            }
+            else
+            {
+                shortterm_goal_nodes[i] = candidate_nodes[i];
+            }
+            has_goal[i] = true;
+        }
+        
+        while(true)
+        {
+            bool found_conflict = false;
+            for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+                for(int j = 0; j < agentSet.getAgentCount(); ++j) {
+                    if (i == j)
+                    {
+                        continue;
+                    }
+                    if(shortterm_goal_nodes[i] == shortterm_goal_nodes[j])
+                    {
+                        found_conflict = true;
+                        if(shortterm_goal_nodes[i] == current_nodes[i])
+                        {
+                            shortterm_goal_nodes[j] = current_nodes[j];
+                        }
+                        else
+                        {
+                            shortterm_goal_nodes[i] = current_nodes[i];
+                        }
+                    }
+                }
+            }
+            if(!found_conflict)
+            {
+                break;
+            }
+        }
+        
+        for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+            if(shortterm_goal_nodes[i] != current_nodes[i])
+            {
+                current_path_index[i]++;
+            }
+        }
+
+        // for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+        //     if(has_goal[i])
+        //     {
+        //         continue;
+        //     }
+        //     Node candidate_node;
+        //     if(current_path_index[i] < paths[i].size() - 1)
+        //     {
+        //         current_path_index[i]++;
+        //         candidate_node = paths[i][current_path_index[i]];
+        //     }
+        //     else
+        //     {
+        //         std::cout<<"agent "<<i<<" is at last node: "<<paths[i].back().i<<","<<paths[i].back().j<<std::endl;
+        //         candidate_node = paths[i].back();
+        //     }
+        //     shortterm_goal_nodes[i] = candidate_node;
+
+        //     // for(int j = 0; j < agentSet.getAgentCount(); ++j) {
+        //     //     if (i == j)
+        //     //     {
+        //     //         continue;
+        //     //     }
+        //     //     // if (i == 8)
+        //     //     // {
+        //     //     //     std::cout<<j<<" shorterm goal: "<<shortterm_goal_nodes[j].i<<","<<shortterm_goal_nodes[j].j<<std::endl;
+        //     //     //     std::cout<<i<<" candidate_node: "<<candidate_node.i<<","<<candidate_node.j<<std::endl;
+        //     //     //     std::cout<<j<<" has_goal: "<<has_goal[j]<<std::endl;
+        //     //     // }
+        //     //     // Stay at the current position if the candidate node has already been selected by another agent
+        //     //     if (has_goal[j] && candidate_node == shortterm_goal_nodes[j] && current_path_index[j] == paths[j].size() - 1)
+        //     //     {
+        //     //         std::cout<<i<<" has same shortterm goal as "<<j<<": "<<candidate_node.i<<","<<candidate_node.j<<std::endl;
+        //     //         shortterm_goal_nodes[i] = current_nodes[i];
+        //     //         current_path_index[i]--;
+        //     //         break;
+        //     //     }
+        //     //     // Swap positions if the candidate node is occupied by a finished agent
+        //     //     if (candidate_node == current_nodes[j] && current_path_index[j] == paths[j].size() - 1)
+        //     //     {
+        //     //         std::cout<<i<<" has shortterm where finished agent "<<j<<std::endl;
+        //     //         shortterm_goal_nodes[j] = current_nodes[i];
+        //     //         has_goal[j] = true;
+        //     //         break;
+        //     //     }
+        //     // }
+        //     for(int j = 0; j < i; ++j) {
+        //         if (shortterm_goal_nodes[i] = shortterm_goal_nodes[j])
+        //         {
+
+        //         }
+        //     }
+        //     has_goal[i] = true;
+        //             std::cout<<i<<" shorterm goal: "<<shortterm_goal_nodes[i].i<<","<<shortterm_goal_nodes[i].j<<std::endl;
+        // }
+        // for(int i = 0; i < agentSet.getAgentCount(); ++i)
+        // {
+        //     agentSet.setAgentGoal(i, shortterm_goal_nodes[i]);
+        // }
+        AgentSet shortterm_agent_set;
+        for (int i = 0; i < agentSet.getAgentCount(); ++i) {
+            shortterm_agent_set.addAgent(current_nodes[i].i, current_nodes[i].j, shortterm_goal_nodes[i].i, shortterm_goal_nodes[i].j);
+
+            // std::cout<<i<<": "<<current_nodes[i].i<<","<<current_nodes[i].j<<"->"<<shortterm_goal_nodes[i].i<<","<<shortterm_goal_nodes[i].j<<std::endl;
+        }
+
+        // std::cout<<"Solving..."<<std::endl;
+        if(!solve(map, config, shortterm_agent_set, begin))
+        {
+            return false;
+        }
+        // std::cout<<"...Solved"<<std::endl;
+        for (int i = 0; i < shortterm_agent_set.getAgentCount(); ++i) {
+            if (shortterm_goal_nodes[i] != shortterm_agent_set.getAgent(i).getCurPosition())
+            {
+                std::cout<<"Failed to move agent "<<i<<" to goal ("<<shortterm_goal_nodes[i].i<<","<<shortterm_goal_nodes[i].j<<")! "<<shortterm_agent_set.getAgent(i).getCurPosition().i<<","<<shortterm_agent_set.getAgent(i).getCurPosition().j<<std::endl;
+            }
+            current_nodes[i] = shortterm_agent_set.getAgent(i).getCurPosition();
+        }
+    }
+    return true;
+}
+
 bool PushAndRotate::solve(const Map &map, const Config &config, AgentSet &agentSet, std::chrono::steady_clock::time_point begin) {
     auto comparator = [&agentSet, &config](int id1, int id2) {
         int subgraph1 = agentSet.getAgent(id1).getSubgraph();
@@ -914,7 +1132,7 @@ MultiagentSearchResult PushAndRotate::startSearch(const Map &map,
     }
     getPriorities(map, agentSet);
 
-    result.pathfound = solve(map, config, agentSet, begin);
+    result.pathfound = solve_wrapper(map, config, agentSet, begin);
     if (result.pathfound) {
         if (config.parallelizePaths1) {
             getParallelPaths(agentSet, config);

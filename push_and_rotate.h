@@ -25,6 +25,7 @@ class PushAndRotate : public MultiagentSearchInterface
         void clear() override;
     private:
         bool solve(const Map &map, const Config &config, AgentSet &AgentSet, std::chrono::steady_clock::time_point start);
+        bool solve_wrapper(const Map &map, const Config &config, AgentSet &AgentSet, std::chrono::steady_clock::time_point start);
         bool clearNode(const Map &map, AgentSet &agentSet, Node &nodeToClear,
                        const std::unordered_set<Node, NodeHash>& occupiedNodes);
         bool push(const Map &map, AgentSet &agentSet, Node& from, Node& to,
