@@ -156,16 +156,16 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
         int newi = neighbor.i, newj = neighbor.j;
             if ((canStay() || di != 0 || dj != 0) && map.CellIsTraversable(newi, newj, occupiedNodes)) {
                 int newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
-                int cost;
-                constexpr int upstream_cost = 16;
-                constexpr int passing_lane_cost = 4;
+                int cost = 1;
+                constexpr int upstream_cost = 4;
+                constexpr int passing_lane_cost = 2;
                 if(di != 0)
                 {
-                    cost = 1;
+                    cost = cost;
                 }
                 else if(curNode.i == 0)
                 {
-                    cost = dj < 0 ? upstream_cost : 1;
+                    cost = dj < 0 ? upstream_cost : cost;
                 }
                 else if(curNode.i == 1)
                 {
@@ -173,7 +173,7 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
                 }
                 else if(curNode.i == 2)
                 {
-                    cost = dj > 0 ? upstream_cost : 1;
+                    cost = dj > 0 ? upstream_cost : cost;
                 }
                 NodeType neigh(newi, newj, nullptr, curNode.g + cost, newh);
                 neigh.conflictsCount = CAT.getAgentsCount(neigh, curNode);
