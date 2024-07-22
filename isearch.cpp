@@ -77,15 +77,6 @@ SearchResult ISearch<NodeType>::startSearch(const Map &map, const AgentSet &agen
 
         cur = getCur(map);
 
-        /*if (agentId == 21 && cur.i == 4 && cur.j == 11 && cur.g == 1) {
-            int t = 0;
-            ++t;
-        }
-
-        if (agentId == 42) {
-            std::cout << cur.i << " " << cur.j << " " << cur.g << std::endl;
-        }*/
-
         bool goalNode = false;
         if ((isGoal != nullptr && isGoal(NodeType(start_i, start_j), cur, map, agentSet)) ||
             (isGoal == nullptr && cur.i == goal_i && cur.j == goal_j))
@@ -165,7 +156,26 @@ std::list<NodeType> ISearch<NodeType>::findSuccessors(const NodeType &curNode, c
         int newi = neighbor.i, newj = neighbor.j;
             if ((canStay() || di != 0 || dj != 0) && map.CellIsTraversable(newi, newj, occupiedNodes)) {
                 int newh = computeHFromCellToCell(newi, newj, goal_i, goal_j);
-                NodeType neigh(newi, newj, nullptr, curNode.g + 1, newh);
+                int cost;
+                constexpr int upstream_cost = 16;
+                constexpr int passing_lane_cost = 4;
+                if(di != 0)
+                {
+                    cost = 1;
+                }
+                else if(curNode.i == 0)
+                {
+                    cost = dj < 0 ? upstream_cost : 1;
+                }
+                else if(curNode.i == 1)
+                {
+                    cost = passing_lane_cost;
+                }
+                else if(curNode.i == 2)
+                {
+                    cost = dj > 0 ? upstream_cost : 1;
+                }
+                NodeType neigh(newi, newj, nullptr, curNode.g + cost, newh);
                 neigh.conflictsCount = CAT.getAgentsCount(neigh, curNode);
                 createSuccessorsFromNode(curNode, neigh, successors, agentId, constraints, CAT,
                                          neigh.i == goal_i && neigh.j == goal_j);
